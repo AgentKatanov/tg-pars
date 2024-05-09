@@ -1,0 +1,41 @@
+from bs4 import BeautifulSoup
+import requests
+
+
+url = f"https://steam-trader.com/en/tf2/?price_from=&price_to=2000&quality=&type=&class=&craft=&text=&sort=-rating&page=1"
+response = requests.get(url)
+soup = BeautifulSoup(response.text, "lxml")
+last = soup.find("div", class_="items").find("span", class_="last ha").text
+
+list_items = []
+
+for i in range(1):
+    print("------------------")
+    print(f"Страница номер {i+1}")
+    url = f"https://steam-trader.com/en/tf2/?price_from=&price_to=2000&quality=&type=&class=&craft=&text=&sort=-rating&page={str(i+1)}"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "lxml")
+    items = soup.find("div", class_="items").find("div", class_="wrap hac")
+
+    for i in items:
+        name = i.find("span", class_="name").text
+        price = i.find("span", class_="price").find("span", class_="price_content").text
+        count = i.find("span", class_="price").find("span", class_="count").text
+        link = "https://steam-trader.com" + i.get("href")
+
+        dic = {"name": name, "price": price, "count": count, "link": link}
+        list_items.append(dic)
+
+pr = list_items[0]["price"]
+print(pr)
+origin = ""
+
+for i in pr:
+    if i == ",":
+        origin += "."
+    elif i == "₽" or i == " ":
+        pass
+    else:
+        origin+=i
+
+start_price = float(origin)
